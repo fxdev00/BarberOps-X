@@ -6,7 +6,7 @@ variable "project_id" {
 variable "region" {
   description = "Region For All GCP Resources"
   type        = string
-  default     = "europe-west2-"
+  default     = "europe-west2"
 }
 
 variable "vpc_cidr" {
