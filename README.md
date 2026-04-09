@@ -1,4 +1,13 @@
-# BarberOps
+# ✂️ BARBEROPS-X Project
+
+## 💫 About Me:
+Self-taught engineer with nearly 10 years of experience working across some of the biggest names in tech: Sky, AWS, and NBCUniversal.<br>Currently building BarberOps-X a 3 tier production-grade application project on GKE Autopilot with modular Terraform, Jenkins CI/CD, ArgoCD GitOps, and Prometheus observability. <br>Every decision documented, every trade-off explained.<br>Focused on platform engineering and building infrastructure the right way!<br>trunk-based Git workflow, infrastructure as code, zero hardcoded credentials, and systems that scale.
+
+
+## 💻 Tech Stack:
+![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white) ![Jenkins](https://img.shields.io/badge/jenkins-%232C5263.svg?style=for-the-badge&logo=jenkins&logoColor=white) ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white) ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+
+
 
 ## Git Strategy
 
@@ -75,7 +84,7 @@ Each branch has one clear purpose, one PR, and merges cleanly — keeping `main`
 I built this infrastructure in layers, where each layer is a dependency of the next. Nothing is arbitrary — the order matters and the diagrams below reflect that.
 
 ```mermaid
-graph TD
+graph LR
     TF[terraform.tfvars<br/>project_id / region]
 
     TF --> VPC[Layer 1 — VPC<br/>Subnet · Pod CIDR · Service CIDR<br/>Cloud NAT]
