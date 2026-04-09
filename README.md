@@ -1,5 +1,75 @@
 # BarberOps
 
+## Git Strategy
+
+I use a **trunk-based, section-scoped branching strategy**. Every piece of work lives on its own short-lived branch, gets reviewed as a PR, and merges into `main`. There are no long-lived feature branches — `main` is always the source of truth.
+
+I chose this approach for four reasons:
+
+- `main` is always in a working state
+- Every change is traceable — you can see exactly what was added and when just by reading the git graph
+- If something breaks, you can pinpoint exactly which branch introduced it
+- When Jenkins and ArgoCD are wired in, merging to `main` automatically triggers a build and deploy — so the branching strategy becomes the deployment mechanism
+
+### Branch Naming
+
+Branches follow a `section/<number>-<description>` convention that mirrors the build order of the project:
+
+```
+main
+├── section/01-repo-structure
+├── section/02-makefile
+├── section/03-tf-vpc
+├── section/03-tf-registry
+├── section/03-tf-gke
+├── section/03-tf-iam
+├── section/03-root-tf
+└── section/doc-01
+```
+
+The section number groups related work (e.g. all Terraform modules share `03-`) and makes the progression of the project readable in the branch list without needing to open each one.
+
+### Commit Convention
+
+| Prefix | When I use it |
+|--------|--------------|
+| `feat:` | Writing new modules, app code, manifests |
+| `fix:` | Correcting errors in existing files |
+| `docs:` | README updates |
+| `ci:` | Jenkinsfile changes |
+| `chore:` | Updating `.gitignore`, deleting placeholders |
+
+### Flow
+
+```mermaid
+gitGraph
+   commit id: "init: first commit"
+   branch section/01-repo-structure
+   checkout section/01-repo-structure
+   commit id: "feat: folder skeleton"
+   checkout main
+   merge section/01-repo-structure
+   branch section/02-makefile
+   checkout section/02-makefile
+   commit id: "feat: Makefile"
+   checkout main
+   merge section/02-makefile
+   branch section/03-tf-vpc
+   checkout section/03-tf-vpc
+   commit id: "feat: VPC module"
+   checkout main
+   merge section/03-tf-vpc
+   branch section/03-root-tf
+   checkout section/03-root-tf
+   commit id: "feat: root module wiring"
+   checkout main
+   merge section/03-root-tf
+```
+
+Each branch has one clear purpose, one PR, and merges cleanly — keeping `main` always deployable.
+
+---
+
 ## Infrastructure Overview
 
 I built this infrastructure in layers, where each layer is a dependency of the next. Nothing is arbitrary — the order matters and the diagrams below reflect that.
