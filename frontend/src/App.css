@@ -1,0 +1,246 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background: #0a0a0a;
+    color: #e5e5e5;
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+  }
+  
+  .app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid #1f1f1f;
+    padding: 20px 0;
+    background: #0e0e0e;
+  }
+  
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #e5e5e5;
+  }
+  
+  .logo span {
+    color: #4ade80;
+  }
+  
+  .tagline {
+    font-size: 12px;
+    color: #525252;
+    letter-spacing: 2px;
+  }
+  
+  /* MAIN */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+  
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #4ade80;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  
+  /* FORM */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .field label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #737373;
+  }
+  
+  .field input,
+  .field select {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #e5e5e5;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  
+  .field input:focus,
+  .field select:focus {
+    border-color: #4ade80;
+  }
+  
+  .field select option {
+    background: #111;
+  }
+  
+  /* STATUS */
+  .status {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  
+  .status.success {
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid #166534;
+    color: #4ade80;
+  }
+  
+  .status.error {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid #7f1d1d;
+    color: #f87171;
+  }
+  
+  /* BUTTON */
+  button[type="submit"] {
+    background: #4ade80;
+    color: #0a0a0a;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    align-self: flex-start;
+  }
+  
+  button[type="submit"]:hover {
+    opacity: 0.85;
+  }
+  
+  button[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* BOOKINGS GRID */
+  .bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  
+  .empty {
+    color: #404040;
+    font-size: 13px;
+  }
+  
+  /* BOOKING CARD */
+  .booking-card {
+    background: #111;
+    border: 1px solid #1f1f1f;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+  
+  .booking-card:hover {
+    border-color: #2a2a2a;
+  }
+  
+  .booking-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .booking-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e5e5e5;
+  }
+  
+  .booking-barber {
+    font-size: 11px;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid #166534;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  
+  .booking-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .booking-time {
+    font-size: 12px;
+    color: #737373;
+  }
+  
+  .cancel-btn {
+    background: none;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: #737373;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  
+  .cancel-btn:hover {
+    border-color: #f87171;
+    color: #f87171;
+  }
+  
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
