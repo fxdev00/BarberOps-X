@@ -137,3 +137,35 @@ graph LR
 ```
 
 The dependency chain is intentional: VPC → GKE → IAM. Artifact Registry is independent and provisions in parallel with GKE. The root module handles all of this wiring — no values are passed manually between modules.
+
+---
+
+## Application Overview
+
+With the infrastructure in place, I built the two application tiers — backend and frontend — and containerised each one ready for deployment on GKE.
+
+```mermaid
+graph LR
+    FE[Frontend<br/>React · nginx<br/>Multi-stage Docker]
+    BE[Backend<br/>Flask API · Gunicorn<br/>Blueprints · CRUD]
+    AR[Artifact Registry<br/>Private image store]
+    GKE[GKE Autopilot<br/>Runs both containers]
+
+    FE -->|HTTP requests| BE
+    BE --> GKE
+    FE --> GKE
+    GKE -->|pulls images| AR
+```
+
+---
+
+### Application Layer 1 — Backend (Flask API)
+
+This is the brain of the application. I built the API in Flask using a blueprint structure so each concern — health checks and bookings — lives in its own module rather than one flat file. The bookings endpoints cover the full CRUD surface: create, read, update, and delete. I containerised it with Docker, running the app under Gunicorn. One thing I hit early was a permission error — Gunicorn couldn't write its worker files because the app user had no home directory. I fixed that by explicitly setting a home directory for the user in the Dockerfile, which is the kind of thing that only shows up when you actually run the container rather than just build it.
+
+---
+
+### Application Layer 2 — Frontend (React)
+
+This is what a customer would actually see and interact with. I built the UI in React with a booking form and a dark theme. The Dockerfile uses a multi-stage build: the first stage installs dependencies and compiles the static assets in a Node image, and the second stage copies only the built output into a lightweight nginx image. The result is a production-ready container that serves nothing except the compiled app — no Node runtime, no dev dependencies, no unnecessary surface area.
+
