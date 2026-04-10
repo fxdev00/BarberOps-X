@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Creating non-root use
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser
 
 WORKDIR /app
 
