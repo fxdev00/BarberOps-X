@@ -1,2 +1,2 @@
-project_id = "866670257509"
+project_id = "barberops-xx"
 region     = "europe-west2"
