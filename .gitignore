@@ -11,6 +11,9 @@ __pycache__/
 *.pyo
 venv/
 
+# Node
+node_modules/
+
 # Environment
 .env
 *.pem
