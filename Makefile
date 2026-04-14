@@ -18,7 +18,7 @@ apply:
 	cd terraform/environments/dev && terraform apply
 
 connect:
-	gcloud container clusters get-credentials barber-cluster \
+	gcloud container clusters get-credentials barberops-cluster \
 	  --region europe-west2 \
 	  --project $$(gcloud config get-value project)
 
