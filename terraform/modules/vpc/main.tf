@@ -14,12 +14,12 @@ resource "google_compute_subnetwork" "subnet" {
   project       = var.project_id
 
   secondary_ip_range {
-    range_name    = "barberops-pods"
+    range_name    = "pods"
     ip_cidr_range = var.pods_cidr
   }
 
   secondary_ip_range {
-    range_name    = "barberops-services"
+    range_name    = "services"
     ip_cidr_range = var.services_cidr
   }
 
