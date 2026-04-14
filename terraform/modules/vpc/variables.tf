@@ -18,11 +18,11 @@ variable "vpc_cidr" {
 variable "pods_cidr" {
   description = "Secondary CIDR For GKE Pods"
   type        = string
-  default     = "10.1.0.0/24"
+  default     = "10.1.0.0/16" # GKE recommands /16
 }
 
 variable "services_cidr" {
   description = "Secondary CIDR For GKE Service"
   type        = string
-  default     = "10.2.0.0/24"
+  default     = "10.2.0.0/16" # GKE recommands /16
 }
