@@ -34,7 +34,7 @@ spec:
               cpu: "500m"
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "bops"]
+              command: ["pg_isready", "-U", "bops", "-d", "barberdb"]
             initialDelaySeconds: 10
             periodSeconds: 5
           volumeMounts:
