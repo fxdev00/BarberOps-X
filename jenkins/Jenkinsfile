@@ -11,6 +11,11 @@ spec:
     image: gcr.io/kaniko-project/executor:debug
     command: [sleep]
     args: ["9999999"]
+    resources:
+      requests:
+        ephemeral-storage: "4Gi"
+      limits:
+        ephemeral-storage: "8Gi"
   - name: tools
     image: google/cloud-sdk:alpine
     command: [cat]
