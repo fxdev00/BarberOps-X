@@ -10,19 +10,10 @@ spec:
     image: gcr.io/kaniko-project/executor:debug
     command: [sleep]
     args: ["9999999"]
-    volumeMounts:
-    - name: workspace-volume
-      mountPath: /workspace
   - name: tools
     image: google/cloud-sdk:alpine
     command: [cat]
     tty: true
-    volumeMounts:
-    - name: workspace-volume
-      mountPath: /workspace
-  volumes:
-  - name: workspace-volume
-    emptyDir: {}
 """
         }
     }
@@ -42,7 +33,6 @@ spec:
                 script {
                     env.BRANCH_TAG = env.GIT_BRANCH.replaceAll('/', '-')
                 }
-                sh 'cp -r . /workspace/'
             }
         }
 
@@ -51,7 +41,7 @@ spec:
                 container('tools') {
                     sh '''
                         pip install flake8 --quiet
-                        flake8 /workspace/backend/ \
+                        flake8 backend/ \
                             --max-line-length=120 \
                             --exclude=__pycache__
                     '''
@@ -66,8 +56,8 @@ spec:
                         container('kaniko') {
                             sh """
                                 /kaniko/executor \
-                                    --context=/workspace/frontend \
-                                    --dockerfile=/workspace/frontend/Dockerfile \
+                                    --context=${WORKSPACE}/frontend \
+                                    --dockerfile=${WORKSPACE}/frontend/Dockerfile \
                                     --destination=${REGISTRY}/frontend:${IMAGE_TAG} \
                                     --destination=${REGISTRY}/frontend:${BRANCH_TAG} \
                                     --push-retry=3
@@ -80,8 +70,8 @@ spec:
                         container('kaniko') {
                             sh """
                                 /kaniko/executor \
-                                    --context=/workspace/backend \
-                                    --dockerfile=/workspace/backend/Dockerfile \
+                                    --context=${WORKSPACE}/backend \
+                                    --dockerfile=${WORKSPACE}/backend/Dockerfile \
                                     --destination=${REGISTRY}/backend:${IMAGE_TAG} \
                                     --destination=${REGISTRY}/backend:${BRANCH_TAG} \
                                     --push-retry=3
@@ -114,9 +104,8 @@ spec:
                     sh """
                         git config user.email "jenkins@barberops.com"
                         git config user.name "Jenkins CI"
-                        sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" /workspace/k8s/frontend/deployment.yaml
-                        sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" /workspace/k8s/backend/deployment.yaml
-                        cd /workspace
+                        sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
+                        sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
                         git add k8s/frontend/deployment.yaml k8s/backend/deployment.yaml
                         git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
                         git push https://${GITHUB_CREDS}@github.com/fxdev00/BarberOps-X.git main
