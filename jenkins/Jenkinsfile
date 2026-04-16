@@ -36,19 +36,19 @@ spec:
             }
         }
 
-        stage('Lint') {
-            steps {
-                container('tools') {
-                    sh '''
-                        pip install flake8 --quiet
-                        flake8 backend/ \
-                            --max-line-length=120 \
-                            --exclude=__pycache__
-                    '''
-                }
+    stage('Lint') {
+        steps {
+            container('tools') {
+                sh '''
+                    apk add --no-cache py3-pip
+                    pip install flake8 --quiet
+                    flake8 backend/ \
+                        --max-line-length=120 \
+                        --exclude=__pycache__
+                '''
             }
         }
-
+    }
         stage('Build Images') {
             parallel {
                 stage('Build Frontend') {
