@@ -10,6 +10,7 @@ RUN npm run build
 
 # Stage 2 — serve (~25MB final image)
 FROM nginx:1.27-alpine
+RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
