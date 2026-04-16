@@ -2,7 +2,9 @@ import os
 import psycopg2
 import logging
 
+
 logger = logging.getLogger(__name__)
+
 
 def get_db():
     return psycopg2.connect(
@@ -11,6 +13,7 @@ def get_db():
         user=os.environ['DB_USER'],         # ← comes from Secret
         password=os.environ['DB_PASSWORD']  # ← comes from Secret
     )
+
 
 def init_db():
     conn = get_db()

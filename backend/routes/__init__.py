@@ -1,2 +1,2 @@
-from .health import health_bp
-from .bookings import bookings_bp
+from .health import health_bp       # noqa: F401
+from .bookings import bookings_bp       # noqa: F401
