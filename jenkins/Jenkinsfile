@@ -48,7 +48,7 @@ spec:
                 }
             }
         }
-
+    }
         stage('Build Images') {
             parallel {
                 stage('Build Frontend') {
