@@ -1,0 +1,134 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:24-dind
+    securityContext:
+      privileged: true
+  - name: tools
+    image: google/cloud-sdk:alpine
+    command: [cat]
+    tty: true
+"""
+        }
+    }
+
+    environment {
+        PROJECT_ID   = "barberops-xx"
+        REGION       = "europe-west2"
+        REGISTRY     = "${REGION}-docker.pkg.dev/${PROJECT_ID}/barberops"
+        IMAGE_TAG    = "${env.GIT_COMMIT[0..7]}"
+        GITHUB_CREDS = credentials('github-token')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.BRANCH_TAG = env.GIT_BRANCH.replaceAll('/', '-')
+                }
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                container('tools') {
+                    sh '''
+                        pip install flake8 --quiet
+                        flake8 backend/ \
+                            --max-line-length=120 \
+                            --exclude=__pycache__
+                    '''
+                }
+            }
+        }
+
+        stage('Build Images') {
+            parallel {
+                stage('Build Frontend') {
+                    steps {
+                        container('docker') {
+                            sh "docker build -t ${REGISTRY}/frontend:${IMAGE_TAG} ./frontend"
+                        }
+                    }
+                }
+                stage('Build Backend') {
+                    steps {
+                        container('docker') {
+                            sh "docker build -t ${REGISTRY}/backend:${IMAGE_TAG} ./backend"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                container('tools') {
+                    sh """
+                        apk add --no-cache curl
+                        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+                        trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress ${REGISTRY}/backend:${IMAGE_TAG}
+                        trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress ${REGISTRY}/frontend:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Push to Artifact Registry') {
+            steps {
+                container('tools') {
+                    sh """
+                        gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+                        docker push ${REGISTRY}/frontend:${IMAGE_TAG}
+                        docker push ${REGISTRY}/backend:${IMAGE_TAG}
+                        docker tag ${REGISTRY}/frontend:${IMAGE_TAG} ${REGISTRY}/frontend:${BRANCH_TAG}
+                        docker tag ${REGISTRY}/backend:${IMAGE_TAG} ${REGISTRY}/backend:${BRANCH_TAG}
+                        docker push ${REGISTRY}/frontend:${BRANCH_TAG}
+                        docker push ${REGISTRY}/backend:${BRANCH_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Update Image Tags in Git') {
+            when {
+                branch 'main'
+            }
+            steps {
+                container('tools') {
+                    sh """
+                        git config user.email "jenkins@barberops.com"
+                        git config user.name "Jenkins CI"
+                        sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
+                        sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
+                        git add k8s/frontend/deployment.yaml k8s/backend/deployment.yaml
+                        git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
+                        git push https://${GITHUB_CREDS}@github.com/fxdev00/BarberOps-X.git main
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build ${IMAGE_TAG} pushed. ArgoCD will deploy within 3 minutes."
+        }
+        failure {
+            echo "Pipeline failed at stage: ${currentBuild.result}"
+        }
+        always {
+            container('docker') {
+                sh "docker rmi ${REGISTRY}/frontend:${IMAGE_TAG} || true"
+                sh "docker rmi ${REGISTRY}/backend:${IMAGE_TAG} || true"
+            }
+        }
+    }
+}
