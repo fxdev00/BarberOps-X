@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 # Creating non-root use
 RUN groupadd -r appuser && useradd -r -g appuser -m appuser
