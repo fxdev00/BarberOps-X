@@ -2,7 +2,9 @@ import os
 import psycopg2
 import logging
 
+
 logger = logging.getLogger(__name__)
+
 
 def get_db():
     return psycopg2.connect(
