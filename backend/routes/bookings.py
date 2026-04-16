@@ -3,8 +3,10 @@ from config import get_db
 import psycopg2
 import logging
 
+
 logger = logging.getLogger(__name__)
 bookings_bp = Blueprint('bookings', __name__)
+
 
 @bookings_bp.route('/bookings', methods=['GET'])
 def get_bookings():
@@ -18,16 +20,16 @@ def get_bookings():
         for r in rows
     ])
 
+
 @bookings_bp.route('/bookings', methods=['POST'])
 def create_bookings():
-    data=request.json
+    data = request.json
     if not all(k in data for k in ['name', 'barber', 'date', 'time']):
         return jsonify({'error': 'Missing required fields'}), 400
     try:
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
-            
             "INSERT INTO bookings (name, barber, date, time) VALUES (%s,%s,%s,%s) RETURNING id",
             (data['name'], data['barber'], data['date'], data['time'])
         )

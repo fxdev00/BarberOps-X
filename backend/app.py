@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-CORS=(app)
+CORS(app)
 
 # Register Blueprint
 app.register_blueprint(health_bp)
