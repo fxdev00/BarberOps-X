@@ -1,0 +1,24 @@
+controller:
+  serviceType: LoadBalancer
+  installPlugins:
+    - kubernetes:latest
+    - workflow-aggregator:latest
+    - git:latest
+    - github:latest
+    - docker-workflow:latest
+    - credentials-binding:latest
+    - google-oauth-plugin:latest
+  serviceAccount:
+    create: true
+    name: jenkins
+    annotations:
+      iam.gke.io/gcp-service-account: jenkins-sa@barberops-xx.iam.gserviceaccount.com
+
+agent:
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
