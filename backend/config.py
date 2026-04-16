@@ -12,6 +12,7 @@ def get_db():
         password=os.environ['DB_PASSWORD']  # ← comes from Secret
     )
 
+
 def init_db():
     conn = get_db()
     cur = conn.cursor()
