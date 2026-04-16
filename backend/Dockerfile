@@ -9,7 +9,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir --upgrade wheel==0.46.2
+RUN pip install --no-cache-dir --upgrade setuptools wheel==0.46.2
 
 COPY . .
 
