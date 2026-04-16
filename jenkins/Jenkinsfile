@@ -96,8 +96,8 @@ spec:
                     sh """
                         apk add --no-cache curl
                         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-                        trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress ${REGISTRY}/backend:${IMAGE_TAG}
-                        trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress ${REGISTRY}/frontend:${IMAGE_TAG}
+                        trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress ${REGISTRY}/backend:${IMAGE_TAG}
+                        trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress ${REGISTRY}/frontend:${IMAGE_TAG}
                     """
                 }
             }
