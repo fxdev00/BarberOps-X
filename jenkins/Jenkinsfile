@@ -90,6 +90,7 @@ spec:
             }
         }
 
+        // Security Scan Stage
         stage('Security Scan') {
             steps {
                 container('tools') {
@@ -135,7 +136,7 @@ spec:
                 }
             }
         }
-        
+
     post {
         success {
             echo "Build ${IMAGE_TAG} pushed. ArgoCD will deploy within 3 minutes."
