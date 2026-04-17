@@ -90,6 +90,7 @@ spec:
             }
         }
 
+        // Security Scan Stage
         stage('Security Scan') {
             steps {
                 container('tools') {
@@ -108,27 +109,29 @@ spec:
                 anyOf {
                     expression {
                         env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main'
+                    }
                 }
             }
             steps {
-                    container('tools') {
-                        withCredentials([usernamePassword(credentialsId: 'github-token', 
-                                                        usernameVariable: 'GIT_USER', 
-                                                        passwordVariable: 'GIT_PAT')]) {
-                            sh '''
-                                git config user.email "jenkins@barberops.com"
-                                git config user.name "Jenkins CI"
-                                
-                                sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
-                                sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
-                                
-                                git add k8s/frontend/deployment.yaml k8s/backend/deployment.yaml
-                                
-                                git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]" || echo "Nothing to commit"
-                                
-                                git push https://${GIT_USER}:${GIT_PAT}@github.com/fxdev00/BarberOps-X.git HEAD:main
-                            '''
-                        }
+                container('tools') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'github-token', 
+                        usernameVariable: 'GIT_USER', 
+                        passwordVariable: 'GIT_PAT'
+                    )]) {
+                        sh '''
+                            git config user.email "jenkins@barberops.com"
+                            git config user.name "Jenkins CI"
+                            
+                            sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
+                            sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
+                            
+                            git add k8s/frontend/deployment.yaml k8s/backend/deployment.yaml
+                            
+                            git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]" || echo "Nothing to commit"
+                            
+                            git push https://${GIT_USER}:${GIT_PAT}@github.com/fxdev00/BarberOps-X.git HEAD:main
+                        '''
                     }
                 }
             }
