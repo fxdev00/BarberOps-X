@@ -47,19 +47,20 @@ spec:
             }
         }
 
-    stage('Lint') {
-        steps {
-            container('tools') {
-                sh '''
-                    apk add --no-cache py3-pip
-                    pip install flake8 --quiet --break-system-packages
-                    flake8 backend/ \
-                        --max-line-length=120 \
-                        --exclude=__pycache__
-                '''
+        stage('Lint') {
+            steps {
+                container('tools') {
+                    sh '''
+                        apk add --no-cache py3-pip
+                        pip install flake8 --quiet --break-system-packages
+                        flake8 backend/ \
+                            --max-line-length=120 \
+                            --exclude=__pycache__
+                    '''
+                }
             }
         }
-    }
+
         stage('Build Backend') {
             steps {
                 container('kaniko') {
@@ -90,7 +91,6 @@ spec:
             }
         }
 
-        // Security Scan Stage
         stage('Security Scan') {
             steps {
                 container('tools') {
@@ -134,6 +134,7 @@ spec:
                 }
             }
         }
+    }   
 
     post {
         success {
