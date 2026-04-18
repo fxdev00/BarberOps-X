@@ -111,31 +111,42 @@ spec:
                 }
             }
             steps {
-                dir('${WORKSPACE}') {    
-                    container('tools') {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'github-token', 
-                            usernameVariable: 'GIT_USER', 
-                            passwordVariable: 'GIT_PAT'
-                        )]) {
-                            sh '''
-                                git config user.email "jenkins@barberops.com"
-                                git config user.name "Jenkins CI"
-                                
-                                sed -i "s|image: .*/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
-                                sed -i "s|image: .*/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
-                                
-                                git add k8s/frontend/deployment.yaml k8s/backend/deployment.yaml
-                                
-                                git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]" || echo "Nothing to commit"
-                                
+                container('tools') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'github-token', 
+                        usernameVariable: 'GIT_USER', 
+                        passwordVariable: 'GIT_PAT'
+                    )]) {
+                        sh '''
+                            set -e  # stop on any error
+
+                            cd ${WORKSPACE}
+
+                            # Install git if missing (alpine image often doesn't have it)
+                            apk add --no-cache git
+
+                            git config user.email "jenkins@barberops.com"
+                            git config user.name "Jenkins CI"
+
+                            # Safer sed that matches your actual YAML
+                            sed -i "s|image: .*barberops/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
+                            sed -i "s|image: .*barberops/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
+
+                            git add k8s/backend/deployment.yaml k8s/frontend/deployment.yaml
+
+                            if git diff --cached --quiet; then
+                                echo "No changes to the image tags - nothing to commit"
+                            else
+                                git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
                                 git push https://${GIT_USER}:${GIT_PAT}@github.com/fxdev00/BarberOps-X.git HEAD:main
-                            '''
-                        }
+                                echo "Successfully updated and pushed new image tags"
+                            fi
+                        '''
                     }
                 }
             }
         }
+        
     }
 
     post {
