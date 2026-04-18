@@ -9,7 +9,7 @@ spec:
   containers:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
-    command: [sleep]
+    command: ["sleep"]
     args: ["9999999"]
     workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
     resources:
@@ -17,9 +17,11 @@ spec:
         ephemeral-storage: "6Gi"
       limits:
         ephemeral-storage: "6Gi"
+
   - name: tools
     image: alpine:3.20
-    command: [cat]
+    command: ["sh"]
+    args: ["-c", "sleep infinity"]
     tty: true
     workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
     securityContext:
@@ -36,10 +38,10 @@ spec:
     }
 
     environment {
-        PROJECT_ID   = "barberops-xx"
-        REGION       = "europe-west2"
-        REGISTRY     = "${REGION}-docker.pkg.dev/${PROJECT_ID}/barberops"
-        IMAGE_TAG    = "${env.GIT_COMMIT[0..7]}"
+        PROJECT_ID = "barberops-xx"
+        REGION     = "europe-west2"
+        REGISTRY   = "${REGION}-docker.pkg.dev/${PROJECT_ID}/barberops"
+        IMAGE_TAG  = "${env.GIT_COMMIT[0..7]}"
     }
 
     stages {
@@ -118,8 +120,8 @@ spec:
             steps {
                 container('tools') {
                     withCredentials([usernamePassword(
-                        credentialsId: 'github-token', 
-                        usernameVariable: 'GIT_USER', 
+                        credentialsId: 'github-token',
+                        usernameVariable: 'GIT_USER',
                         passwordVariable: 'GIT_PAT'
                     )]) {
                         sh '''
@@ -129,13 +131,10 @@ spec:
 
                             apk add --no-cache git
 
-                            # Fix git ownership issue
                             git config --global --add safe.directory "${WORKSPACE}"
-
                             git config user.email "jenkins@barberops.com"
                             git config user.name "Jenkins CI"
 
-                            # Update image tags
                             sed -i "s|image: .*backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
                             sed -i "s|image: .*frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
 
@@ -146,7 +145,7 @@ spec:
                             else
                                 git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
                                 git push https://${GIT_USER}:${GIT_PAT}@github.com/fxdev00/BarberOps-X.git HEAD:main
-                                echo "✅ Image tags updated and pushed successfully"
+                                echo "Updated image tags"
                             fi
                         '''
                     }
@@ -157,10 +156,10 @@ spec:
 
     post {
         success {
-            echo "Build ${IMAGE_TAG} pushed. ArgoCD will deploy within 3 minutes."
+            echo "Build ${IMAGE_TAG} pushed."
         }
         failure {
-            echo "Pipeline failed at stage: ${currentBuild.result}"
+            echo "Pipeline failed."
         }
     }
 }
