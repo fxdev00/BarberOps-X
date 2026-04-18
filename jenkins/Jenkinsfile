@@ -18,10 +18,14 @@ spec:
       limits:
         ephemeral-storage: "6Gi"
   - name: tools
-    image: ubuntu:22.04
+    image: alpine:3.20
     command: [cat]
     tty: true
     workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
     resources:
       requests:
         ephemeral-storage: "2Gi"
@@ -36,7 +40,6 @@ spec:
         REGION       = "europe-west2"
         REGISTRY     = "${REGION}-docker.pkg.dev/${PROJECT_ID}/barberops"
         IMAGE_TAG    = "${env.GIT_COMMIT[0..7]}"
-        GITHUB_CREDS = credentials('github-token')
     }
 
     stages {
@@ -53,8 +56,7 @@ spec:
             steps {
                 container('tools') {
                     sh '''
-                        apt-get update -qq
-                        apt-get install -y python3-pip git
+                        apk add --no-cache py3-pip git
                         pip install flake8 --quiet --break-system-packages
                         flake8 backend/ \
                             --max-line-length=120 \
@@ -125,14 +127,15 @@ spec:
 
                             cd ${WORKSPACE}
 
-                            apt-get update -qq
-                            apt-get install -y git
+                            apk add --no-cache git
 
+                            # Fix git ownership issue
                             git config --global --add safe.directory "${WORKSPACE}"
 
                             git config user.email "jenkins@barberops.com"
                             git config user.name "Jenkins CI"
 
+                            # Update image tags
                             sed -i "s|image: .*backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
                             sed -i "s|image: .*frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
 
