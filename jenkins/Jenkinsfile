@@ -136,6 +136,7 @@ spec:
                 }
             }
         }
+    }
 
     post {
         success {
