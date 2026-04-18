@@ -18,7 +18,7 @@ spec:
       limits:
         ephemeral-storage: "6Gi"
   - name: tools
-    image: google/cloud-sdk:alpine
+    image: google/cloud-sdk:slim
     command: [cat]
     tty: true
     workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
@@ -53,7 +53,7 @@ spec:
             steps {
                 container('tools') {
                     sh '''
-                        apk add --no-cache py3-pip
+                        apk add --no-cache py3-pip git
                         pip install flake8 --quiet --break-system-packages
                         flake8 backend/ \
                             --max-line-length=120 \
