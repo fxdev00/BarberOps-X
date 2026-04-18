@@ -11,6 +11,7 @@ spec:
     image: gcr.io/kaniko-project/executor:debug
     command: [sleep]
     args: ["9999999"]
+    workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
     resources:
       requests:
         ephemeral-storage: "6Gi"
@@ -20,6 +21,7 @@ spec:
     image: google/cloud-sdk:alpine
     command: [cat]
     tty: true
+    workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
     resources:
       requests:
         ephemeral-storage: "2Gi"
@@ -118,35 +120,36 @@ spec:
                         passwordVariable: 'GIT_PAT'
                     )]) {
                         sh '''
-                            set -e  # stop on any error
+                            set -e
 
                             cd ${WORKSPACE}
 
-                            # Install git if missing (alpine image often doesn't have it)
                             apk add --no-cache git
+
+                            # Fix git ownership issue (very common in k8s agents)
+                            git config --global --add safe.directory "${WORKSPACE}"
 
                             git config user.email "jenkins@barberops.com"
                             git config user.name "Jenkins CI"
 
-                            # Safer sed that matches your actual YAML
-                            sed -i "s|image: .*barberops/backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
-                            sed -i "s|image: .*barberops/frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
+                            # Update image tags - matched to your actual deployment YAML
+                            sed -i "s|image: .*backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
+                            sed -i "s|image: .*frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
 
                             git add k8s/backend/deployment.yaml k8s/frontend/deployment.yaml
 
                             if git diff --cached --quiet; then
-                                echo "No changes to the image tags - nothing to commit"
+                                echo "No changes to image tags - skipping commit"
                             else
                                 git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
                                 git push https://${GIT_USER}:${GIT_PAT}@github.com/fxdev00/BarberOps-X.git HEAD:main
-                                echo "Successfully updated and pushed new image tags"
+                                echo "✅ Image tags updated and pushed successfully"
                             fi
                         '''
                     }
                 }
             }
         }
-        
     }
 
     post {
