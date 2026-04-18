@@ -1,3 +1,42 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: [sleep]
+    args: ["9999999"]
+    resources:
+      requests:
+        ephemeral-storage: "6Gi"
+      limits:
+        ephemeral-storage: "6Gi"
+  - name: tools
+    image: google/cloud-sdk:alpine
+    command: [cat]
+    tty: true
+    resources:
+      requests:
+        ephemeral-storage: "2Gi"
+      limits:
+        ephemeral-storage: "2Gi"
+"""
+        }
+    }
+
+    environment {
+        PROJECT_ID   = "barberops-xx"
+        REGION       = "europe-west2"
+        REGISTRY     = "${REGION}-docker.pkg.dev/${PROJECT_ID}/barberops"
+        IMAGE_TAG    = "${env.GIT_COMMIT[0..7]}"
+        GITHUB_CREDS = credentials('github-token')
+    }
+
     stages {
         stage('Checkout') {
             steps {
