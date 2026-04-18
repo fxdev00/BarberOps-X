@@ -18,7 +18,7 @@ spec:
       limits:
         ephemeral-storage: "6Gi"
   - name: tools
-    image: google/cloud-sdk:slim
+    image: ubuntu:22.04
     command: [cat]
     tty: true
     workingDir: /home/jenkins/agent/workspace/${JOB_NAME}
@@ -53,7 +53,8 @@ spec:
             steps {
                 container('tools') {
                     sh '''
-                        apk add --no-cache py3-pip git
+                        apt-get update -qq
+                        apt-get install -y python3-pip git
                         pip install flake8 --quiet --break-system-packages
                         flake8 backend/ \
                             --max-line-length=120 \
@@ -124,15 +125,14 @@ spec:
 
                             cd ${WORKSPACE}
 
-                            apk add --no-cache git
+                            apt-get update -qq
+                            apt-get install -y git
 
-                            # Fix git ownership issue (very common in k8s agents)
                             git config --global --add safe.directory "${WORKSPACE}"
 
                             git config user.email "jenkins@barberops.com"
                             git config user.name "Jenkins CI"
 
-                            # Update image tags - matched to your actual deployment YAML
                             sed -i "s|image: .*backend:.*|image: ${REGISTRY}/backend:${IMAGE_TAG}|g" k8s/backend/deployment.yaml
                             sed -i "s|image: .*frontend:.*|image: ${REGISTRY}/frontend:${IMAGE_TAG}|g" k8s/frontend/deployment.yaml
 
